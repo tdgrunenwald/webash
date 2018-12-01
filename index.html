@@ -13,21 +13,28 @@
 	</head>
 	<body>
 		<script>
+			const PS1 = "guest@tylergrunenwald.com ~ $ "
+
+			// create terminal
 			var term = new Terminal()
 			document.body.appendChild(term.html)
 
+			// handle input
 			(function processInput(input) {
 				if (input) {
 					argv = input.split(" ")
 					switch (argv[0]) {
 						case "echo":
-							term.print(input.replace(argv[0], "").trim())
+							term.print(input.replace(argv[0], "").trim().replace(/\"/g, ""))
+							break;
+						case "clear":
+							term.clear()
 							break;
 						default:
 							term.print("-bash: " + argv[0] + ": command not	found")
 					}
 				}
-				term.input("tyler@website\n$ ", processInput)
+				term.input(PS1, processInput)
 			}())
 		</script>
 	</body>
