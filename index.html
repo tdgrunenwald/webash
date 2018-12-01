@@ -20,7 +20,7 @@
 			document.body.appendChild(term.html)
 
 			// handle input
-			(function processInput(input) {
+			function processInput(input) {
 				if (input) {
 					argv = input.split(" ")
 					switch (argv[0]) {
@@ -35,7 +35,9 @@
 					}
 				}
 				term.input(PS1, processInput)
-			}())
+			}
+
+			term.input(PS1, processInput)
 		</script>
 	</body>
 </html>
