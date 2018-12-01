@@ -17,7 +17,16 @@
 			document.body.appendChild(term.html)
 
 			(function processInput(input) {
-				if (input) term.print(" - " + input)
+				if (input) {
+					argv = input.split(" ")
+					switch (argv[0]) {
+						case "echo":
+							term.print(input.replace(argv[0], "").trim())
+							break;
+						default:
+							term.print("-bash: " + argv[0] + ": command not	found")
+					}
+				}
 				term.input("tyler@website\n$ ", processInput)
 			}())
 		</script>
