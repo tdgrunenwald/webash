@@ -17,7 +17,7 @@
 			const dirs = new Object()
 			dirs[HOME] = ["about", "resume"]
 			dirs[HOME + "/projects"] = ["website"]
-			dirs[HOME + "/projects/github"] = []
+			dirs[HOME + "/projects/github"] = ["hello-world"]
 
 			var CWD = HOME // current working directory
 
@@ -37,7 +37,11 @@
 							term.clear()
 							break;
 						case "ls":
-							ls()
+							if (argv[1]) { 
+								ls(argv[1]) 
+							} else { 
+								ls()
+							}
 							break;
 						case "cd":
 							cd(argv[1])
@@ -53,10 +57,16 @@
 			}
 
 
-			function ls() {
+			function ls(dir) {
+				if (!dir) {
+					dir = CWD
+				} else {
+					dir = CWD + "/" + dir
+				}
+
 				let newListing = document.createElement('div')
 
-				files = dirs[CWD]
+				files = dirs[dir]
 				for (x in files) {
 					let span = document.createElement('span')
 					span.textContent = files[x]
@@ -65,7 +75,7 @@
 					newListing.appendChild(span)
 				}
 
-				subDirs = getSubDirs()
+				subDirs = getSubDirs(dir)
 				for (x in subDirs) {
 					let span = document.createElement('span')
 					span.textContent = subDirs[x]
@@ -78,14 +88,29 @@
 			}
 
 			function cd(dir) {
-				if (!dir || dir === "~" || dir === "") {
+				// clean input
+				if (!dir) { 
 					CWD = HOME
-				} else if (getSubDirs().includes(dir)) {
-					CWD = CWD + "/" + dir
-				} else if (dirs[CWD].includes(dir)) {
-					term.print("-bash: cd: " + dir + ": Not a directory")
 				} else {
-					term.print("-bash: cd: " + dir + ": No such file or directory")
+					if (![".", "/", "~"].includes(dir[0])) dir = CWD + "/" + dir
+					if (dir.endsWith("/")) dir = dir.substring(0, dir.length - 1)
+					dir = dir.replace("..", CWD.substring(0, CWD.lastIndexOf("/")))
+					dir = dir.replace(".", CWD)
+					dir = dir.replace("~", HOME)
+
+					if (Object.keys(dirs).includes(dir)) {
+						CWD = dir
+					} else {
+						for (d in dirs) {
+							for (f in dirs[d]) {
+								if (dir === d + dirs[d][f]) {
+									term.print("-bash: cd: " + dir + ": Not a directory")
+									return
+								}
+							}
+						}
+						term.print("-bash: cd: " + dir + ": No such file or directory")
+					}
 				}
 			}
 
@@ -93,10 +118,11 @@
 				return "guest@tylergrunenwald.com " + CWD.replace(HOME, "~") + " $ "
 			}
 
-			function getSubDirs() {
+			function getSubDirs(workingDir) {
+				if (!workingDir) workingDir = CWD
 				let subDirs = []
 				Object.keys(dirs).forEach((key) => { 
-					let regex = new RegExp(CWD + "/([^/]+)/?.*")
+					let regex = new RegExp(workingDir + "/([^/]+)/?.*")
 					let match = regex.exec(key)
 					if (match && !subDirs.includes(match[1])) subDirs.push(match[1]) 
 				})
