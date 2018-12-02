@@ -82,6 +82,10 @@
 					CWD = HOME
 				} else if (getSubDirs().includes(dir)) {
 					CWD = CWD + "/" + dir
+				} else if (dirs[CWD].includes(dir)) {
+					term.print("-bash: cd: " + dir + ": Not a directory")
+				} else {
+					term.print("-bash: cd: " + dir + ": No such file or directory")
 				}
 			}
 
