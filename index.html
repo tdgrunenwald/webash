@@ -61,57 +61,76 @@
 				if (!dir) {
 					dir = CWD
 				} else {
-					dir = CWD + "/" + dir
+					dir = parsePath(dir)
 				}
 
-				let newListing = document.createElement('div')
-
-				files = dirs[dir]
-				for (x in files) {
-					let span = document.createElement('span')
-					span.textContent = files[x]
-					span.style.marginRight = "20px"
-					span.style.color = "lightblue"
-					newListing.appendChild(span)
+				if (Object.keys(dirs).includes(dir)) {
+					let newListing = document.createElement('div')
+					files = dirs[dir]
+					for (x in files) {
+						let span = document.createElement('span')
+						span.textContent = files[x]
+						span.style.marginRight = "20px"
+						span.style.color = "lightblue"
+						newListing.appendChild(span)
+					}
+					subDirs = getSubDirs(dir)
+					for (x in subDirs) {
+						let span = document.createElement('span')
+						span.textContent = subDirs[x]
+						span.style.marginRight = "20px"
+						span.style.color = "blue"
+						newListing.appendChild(span)
+					}
+					term._output.appendChild(newListing)
+				} else {
+					for (d in dirs) {
+						for (f in dirs[d]) {
+							if (dir === d + "/" + dirs[d][f]) {
+								let file = document.createElement('div')
+								file.textContent = dirs[d][f]
+								file.style.color = "lightblue"
+								term._output.appendChild(file)
+								return
+							}
+						}
+					}
+					bashError("ls", dir, "No such file or directory")
 				}
-
-				subDirs = getSubDirs(dir)
-				for (x in subDirs) {
-					let span = document.createElement('span')
-					span.textContent = subDirs[x]
-					span.style.marginRight = "20px"
-					span.style.color = "blue"
-					newListing.appendChild(span)
-				}
-
-				term._output.appendChild(newListing)
 			}
 
 			function cd(dir) {
-				// clean input
 				if (!dir) { 
 					CWD = HOME
 				} else {
-					if (![".", "/", "~"].includes(dir[0])) dir = CWD + "/" + dir
-					if (dir.endsWith("/")) dir = dir.substring(0, dir.length - 1)
-					dir = dir.replace("..", CWD.substring(0, CWD.lastIndexOf("/")))
-					dir = dir.replace(".", CWD)
-					dir = dir.replace("~", HOME)
-
+					dir = parsePath(dir) // clean input
 					if (Object.keys(dirs).includes(dir)) {
 						CWD = dir
 					} else {
 						for (d in dirs) {
 							for (f in dirs[d]) {
-								if (dir === d + dirs[d][f]) {
-									term.print("-bash: cd: " + dir + ": Not a directory")
+								if (dir === d + "/" + dirs[d][f]) {
+									bashError("cd", dir, "Not a directory")
 									return
 								}
 							}
 						}
-						term.print("-bash: cd: " + dir + ": No such file or directory")
+						bashError("cd", dir, "No such file or directory")
 					}
 				}
+			}
+
+			function parsePath(path) {
+				if (![".", "/", "~"].includes(path[0])) path = CWD + "/" + path
+				if (path.endsWith("/")) path = path.substring(0, path.length - 1)
+				path = path.replace("..", CWD.substring(0, CWD.lastIndexOf("/")))
+				path = path.replace(".", CWD)
+				path = path.replace("~", HOME)
+				return path
+			}
+
+			function bashError(func, arg, error) {
+				term.print("-bash: " + func + ": " + arg + ": " + error)
 			}
 
 			function ps1() {
