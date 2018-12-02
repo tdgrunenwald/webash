@@ -13,33 +13,16 @@
 	</head>
 	<body>
 		<script>
-			const PS1 = "guest@tylergrunenwald.com ~ $ "
+			const HOME = "/home/guest"
 			const dirs = new Object()
-			dirs["~"] = ["about", "resume", "projects"]
-			dirs["projects"] = ["website"]
+			dirs[HOME] = ["about", "resume"]
+			dirs[HOME + "/projects"] = ["website"]
+			dirs[HOME + "/projects/github"] = []
 
-			var CWD = "~" // current working directory
+			var CWD = HOME // current working directory
 
 			// create terminal
 			var term = new Terminal()
-
-			// extension methods
-			term.ls = function(files) {
-				var newListing = document.createElement('div')
-				for (x in files) {
-					var span = document.createElement('span')
-					span.textContent = files[x]
-					span.style.marginRight = "20px"
-					if (Object.keys(dirs).includes(files[x])) {
-						span.style.color = "blue"
-					} else {
-						span.style.color = "lightblue"
-					}
-					newListing.appendChild(span)
-				}
-				term._output.appendChild(newListing)
-			}
-
 			document.body.appendChild(term.html)
 
 			// handle input
@@ -54,16 +37,70 @@
 							term.clear()
 							break;
 						case "ls":
-							term.ls(dirs[CWD])
+							ls()
+							break;
+						case "cd":
+							cd(argv[1])
+							break;
+						case "pwd":
+							term.print(CWD)
 							break;
 						default:
 							term.print("-bash: " + argv[0] + ": command not	found")
 					}
 				}
-				term.input(PS1, processInput)
+				term.input(ps1(), processInput)
 			}
 
-			term.input(PS1, processInput)
+
+			function ls() {
+				let newListing = document.createElement('div')
+
+				files = dirs[CWD]
+				for (x in files) {
+					let span = document.createElement('span')
+					span.textContent = files[x]
+					span.style.marginRight = "20px"
+					span.style.color = "lightblue"
+					newListing.appendChild(span)
+				}
+
+				subDirs = getSubDirs()
+				for (x in subDirs) {
+					let span = document.createElement('span')
+					span.textContent = subDirs[x]
+					span.style.marginRight = "20px"
+					span.style.color = "blue"
+					newListing.appendChild(span)
+				}
+
+				term._output.appendChild(newListing)
+			}
+
+			function cd(dir) {
+				if (!dir || dir === "~" || dir === "") {
+					CWD = HOME
+				} else if (getSubDirs().includes(dir)) {
+					CWD = CWD + "/" + dir
+				}
+			}
+
+			function ps1() {
+				return "guest@tylergrunenwald.com " + CWD.replace(HOME, "~") + " $ "
+			}
+
+			function getSubDirs() {
+				let subDirs = []
+				Object.keys(dirs).forEach((key) => { 
+					let regex = new RegExp(CWD + "/([^/]+)/?.*")
+					let match = regex.exec(key)
+					if (match && !subDirs.includes(match[1])) subDirs.push(match[1]) 
+				})
+				return subDirs
+			}
+
+			// show initial prompt
+			term.input(ps1(), processInput)
 		</script>
 	</body>
 </html>
