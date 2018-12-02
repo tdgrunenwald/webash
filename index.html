@@ -14,9 +14,32 @@
 	<body>
 		<script>
 			const PS1 = "guest@tylergrunenwald.com ~ $ "
+			const dirs = new Object()
+			dirs["~"] = ["about", "resume", "projects"]
+			dirs["projects"] = ["website"]
+
+			var CWD = "~" // current working directory
 
 			// create terminal
 			var term = new Terminal()
+
+			// extension methods
+			term.ls = function(files) {
+				var newListing = document.createElement('div')
+				for (x in files) {
+					var span = document.createElement('span')
+					span.textContent = files[x]
+					span.style.marginRight = "20px"
+					if (Object.keys(dirs).includes(files[x])) {
+						span.style.color = "blue"
+					} else {
+						span.style.color = "lightblue"
+					}
+					newListing.appendChild(span)
+				}
+				term._output.appendChild(newListing)
+			}
+
 			document.body.appendChild(term.html)
 
 			// handle input
@@ -29,6 +52,9 @@
 							break;
 						case "clear":
 							term.clear()
+							break;
+						case "ls":
+							term.ls(dirs[CWD])
 							break;
 						default:
 							term.print("-bash: " + argv[0] + ": command not	found")
