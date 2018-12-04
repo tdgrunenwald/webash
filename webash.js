@@ -94,18 +94,14 @@ function ls(dir) {
 		}
 		term._output.appendChild(newListing)
 	} else {
-		for (d in dirs) {
-			for (f in dirs[d]) {
-				if (dir === d + "/" + dirs[d][f]) {
-					let file = document.createElement('div')
-					file.textContent = dirs[d][f]
-					file.style.color = "lightblue"
-					term._output.appendChild(file)
-					return
-				}
-			}
-		}
-		bashError("ls", dir, "No such file or directory")
+		fileOp(dir, (fname, dname, findex) => {
+			let file = document.createElement('div')
+			file.textContent = dirs[dname][findex]
+			file.style.color = "lightblue"
+			term._output.appendChild(file)
+		}, (fname, dname, findex) => {
+			bashError("ls", fname, "No such file or directory")
+		})
 	}
 }
 
@@ -117,15 +113,11 @@ function cd(dir) {
 		if (Object.keys(dirs).includes(dir)) {
 			CWD = dir
 		} else {
-			for (d in dirs) {
-				for (f in dirs[d]) {
-					if (dir === d + "/" + dirs[d][f]) {
-						bashError("cd", dir, "Not a directory")
-						return
-					}
-				}
-			}
-			bashError("cd", dir, "No such file or directory")
+			fileOp(dir, (fname, dname, findex) => {
+				bashError("cd", fname, "Not a directory")
+			}, (fname, dname, findex) => {
+				bashError("cd", fname, "No such file or directory")
+			})
 		}
 	}
 }
@@ -137,6 +129,18 @@ function parsePath(path) {
 	path = path.replace(".", CWD)
 	path = path.replace("~", HOME)
 	return path
+}
+
+function fileOp(fname, onFileFound, onError) {
+	for (dname in dirs) {
+		for (findex in dirs[dname]) {
+			if (fname === dname + "/" + dirs[dname][findex]) {
+				onFileFound(fname, dname, findex)
+				return
+			}
+		}
+	}
+	onError(fname, dname, findex)
 }
 
 function bashError(func, arg, error) {
