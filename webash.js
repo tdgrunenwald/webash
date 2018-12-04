@@ -70,57 +70,58 @@ function processInput(input) {
 function ls(dir) {
 	if (!dir) {
 		dir = CWD
-	} else {
-		dir = parsePath(dir)
 	}
 
-	if (Object.keys(dirs).includes(dir)) {
-		let newListing = document.createElement('div')
-		files = dirs[dir]
-		for (x in files) {
-			let span = document.createElement('span')
-			span.textContent = files[x]
-			span.className = 'file'
-			newListing.appendChild(span)
-		}
-		subDirs = getSubDirs(dir)
-		for (x in subDirs) {
-			let span = document.createElement('span')
-			span.textContent = subDirs[x]
-			span.className = 'directory'
-			newListing.appendChild(span)
-		}
-		term._output.appendChild(newListing)
-	} else {
-		fileOp(dir, (fname, dname, findex) => {
-			let file = document.createElement('div')
-			file.textContent = dirs[dname][findex]
-			file.className = 'file'
-			term._output.appendChild(file)
-		}, (fname, dname, findex) => {
+	fileOp(dir, (fname, dname, findex) => {
+		let file = document.createElement('div')
+		file.textContent = dirs[dname][findex]
+		file.className = 'file'
+		term._output.appendChild(file)
+	}, (fname, dname, findex) => {
+		if (Object.keys(dirs).includes(fname)) {
+			let newListing = document.createElement('div')
+			files = dirs[fname]
+			for (x in files) {
+				let span = document.createElement('span')
+				span.textContent = files[x]
+				span.className = 'file'
+				newListing.appendChild(span)
+			}
+			subDirs = getSubDirs(fname)
+			for (x in subDirs) {
+				let span = document.createElement('span')
+				span.textContent = subDirs[x]
+				span.className = 'directory'
+				newListing.appendChild(span)
+			}
+			term._output.appendChild(newListing)
+		} else {
 			bashError("ls", fname, "No such file or directory")
-		})
-	}
+		}
+	})
 }
 
 function cd(dir) {
 	if (!dir) { 
 		CWD = HOME
 	} else {
-		dir = parsePath(dir) // clean input
-		if (Object.keys(dirs).includes(dir)) {
-			CWD = dir
-		} else {
-			fileOp(dir, (fname, dname, findex) => {
-				bashError("cd", fname, "Not a directory")
-			}, (fname, dname, findex) => {
+		fileOp(dir, (fname, dname, findex) => {
+			bashError("cd", fname, "Not a directory")
+		}, (fname, dname, findex) => {
+			if (Object.keys(dirs).includes(fname)) {
+				CWD = fname
+			} else {
 				bashError("cd", fname, "No such file or directory")
-			})
-		}
+			}
+		})
 	}
 }
 
-function parsePath(path) {
+function cat(file) {
+
+}
+
+function cleanPath(path) {
 	if (![".", "/", "~"].includes(path[0])) path = CWD + "/" + path
 	if (path.endsWith("/")) path = path.substring(0, path.length - 1)
 	path = path.replace("..", CWD.substring(0, CWD.lastIndexOf("/")))
@@ -129,16 +130,17 @@ function parsePath(path) {
 	return path
 }
 
-function fileOp(fname, onFileFound, onError) {
+function fileOp(fname, onFile, onNotFile) {
+	fname = cleanPath(fname)
 	for (dname in dirs) {
 		for (findex in dirs[dname]) {
 			if (fname === dname + "/" + dirs[dname][findex]) {
-				onFileFound(fname, dname, findex)
+				onFile(fname, dname, findex)
 				return
 			}
 		}
 	}
-	onError(fname, dname, findex)
+	onNotFile(fname, dname, findex)
 }
 
 function bashError(func, arg, error) {
