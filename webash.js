@@ -80,16 +80,14 @@ function ls(dir) {
 		for (x in files) {
 			let span = document.createElement('span')
 			span.textContent = files[x]
-			span.style.marginRight = "20px"
-			span.style.color = "lightblue"
+			span.className = 'file'
 			newListing.appendChild(span)
 		}
 		subDirs = getSubDirs(dir)
 		for (x in subDirs) {
 			let span = document.createElement('span')
 			span.textContent = subDirs[x]
-			span.style.marginRight = "20px"
-			span.style.color = "blue"
+			span.className = 'directory'
 			newListing.appendChild(span)
 		}
 		term._output.appendChild(newListing)
@@ -97,7 +95,7 @@ function ls(dir) {
 		fileOp(dir, (fname, dname, findex) => {
 			let file = document.createElement('div')
 			file.textContent = dirs[dname][findex]
-			file.style.color = "lightblue"
+			file.className = 'file'
 			term._output.appendChild(file)
 		}, (fname, dname, findex) => {
 			bashError("ls", fname, "No such file or directory")
