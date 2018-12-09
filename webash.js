@@ -70,6 +70,12 @@ const _root = {
 	}
 }
 
+function printPre(text) {
+	let content = document.createElement('pre')
+	content.textContent = text
+	term._output.appendChild(content)
+}
+
 function parsePath(path) {
 	if (!path) {
 		path = CWD
@@ -121,6 +127,10 @@ function bashError(func, arg, error) {
 	term.print("-bash: " + func + ": " + arg + ": " + error)
 }
 
+function error(func, arg, error) {
+	term.print(func + ": " + arg + ": " + error)
+}
+
 function ps1() {
 	return "guest@tylergrunenwald.com " + CWD + " $ "
 }
@@ -155,7 +165,14 @@ const functions = {
 		}
 	},
 	cat: (argv) => {
-		term.print("Not Implemented")
+		let res = parsePath(argv[1])
+		if (res[0] && res[0].type > 0) {
+			printPre(res[0].content)
+		} else if (res[0] && res[0].type === 0) {
+			error("cat", argv[1], "Is a directory")
+		} else {
+			bashError("cat", argv[1], "No such file or directory")
+		}
 	}
 }
 
