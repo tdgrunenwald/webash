@@ -76,6 +76,40 @@ function printPre(text) {
 	term._output.appendChild(content)
 }
 
+function printFile(fname) {
+	let row = document.createElement('div')
+	let file = document.createElement('span')
+	file.textContent = fname
+	file.className = "file"
+	row.textContent = "-rw-r--r--. tyler www-data "
+	row.appendChild(file)
+	term._output.appendChild(row)
+}
+
+function printLink(lname, url) {
+	let row = document.createElement('div')
+	let link = document.createElement('a')
+	let target = document.createElement('span')
+	link.textContent = lname
+	link.className = "link"
+	link.href = url
+	target.textContent = " -> " + url
+	row.textContent = "lrwxrwxrwx. tyler www-data "
+	row.appendChild(link)
+	row.appendChild(target)
+	term._output.appendChild(row)
+}
+
+function printDirectory(dname) {
+	let row = document.createElement('div')
+	let dir = document.createElement('span')
+	dir.textContent = dname + "/"
+	dir.className = "directory"
+	row.textContent = "drwxr-xr-x. tyler www-data "
+	row.appendChild(dir)
+	term._output.appendChild(row)
+}
+
 function parsePath(path) {
 	if (!path) {
 		path = CWD
@@ -147,10 +181,18 @@ const functions = {
 		if (res[0]) {
 			if (res[0].type === 0) {
 				Object.keys(res[0].content).forEach((key) => {
-					term.print(key.substring(1, key.length))
+					let name = key.substring(1, key.length)
+					switch (res[0].content[key].type) {
+						case 0: printDirectory(name); break;
+						case 1: printLink(name, res[0].content[key].content); break;
+						case 2: printFile(name); break;
+						default: console.log("unknown file type: " + res[0].content[key].type)
+					}
 				})
+			} else if (res[0].type === 1) {
+				printLink(res[1].substring(res[1].lastIndexOf("/") + 1, res[1].length), res[0].content)
 			} else {
-				term.print(res[1].substring(res[1].lastIndexOf("/") + 1, res[1].length))
+				printFile(res[1].substring(res[1].lastIndexOf("/") + 1, res[1].length))
 			}
 		} else {
 			bashError("ls", argv[1], "No such file or directory")
