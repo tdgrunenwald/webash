@@ -132,7 +132,7 @@ const functions = {
 		let line = argv.join(" ")
 		term.print(line.replace(argv[0], "").trim().replace(/\"/g, "")) 
 	},
-	ls: (argv) => { //ls(argv[1]) 
+	ls: (argv) => {
 		let res = parsePath(argv[1])
 		if (res[0]) {
 			if (res[0].type === 0) {
@@ -146,10 +146,15 @@ const functions = {
 			bashError("ls", argv[1], "No such file or directory")
 		}
 	},
-	cd: (argv) => { //cd(argv[1]) 
-		term.print("Not Implemented")
+	cd: (argv) => {
+		let res = parsePath(argv[1])
+		if (res[0] && res[0].type === 0) {
+			CWD = res[1]
+		} else {
+			bashError("cd", argv[1], "Not a directory")
+		}
 	},
-	cat: (argv) => { //cat(argv[1]) 
+	cat: (argv) => {
 		term.print("Not Implemented")
 	}
 }
