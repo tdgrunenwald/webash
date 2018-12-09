@@ -31,42 +31,6 @@ dirs[HOME + "/projects/github"] = ["hello-world"]
 
 var CWD = HOME // current working directory
 
-// create terminal
-var term = new Terminal()
-document.body.appendChild(term.html)
-
-// handle input
-function processInput(input) {
-	if (input) {
-		argv = input.split(" ")
-		switch (argv[0]) {
-			case "echo":
-				term.print(input.replace(argv[0], "").trim().replace(/\"/g, ""))
-				break;
-			case "clear":
-				term.clear()
-				break;
-			case "ls":
-				if (argv[1]) { 
-					ls(argv[1]) 
-				} else { 
-					ls()
-				}
-				break;
-			case "cd":
-				cd(argv[1])
-				break;
-			case "pwd":
-				term.print(CWD)
-				break;
-			default:
-				term.print("-bash: " + argv[0] + ": command not	found")
-		}
-	}
-	term.input(ps1(), processInput)
-}
-
-
 function ls(dir) {
 	if (!dir) {
 		dir = CWD
@@ -118,18 +82,64 @@ function cd(dir) {
 }
 
 function cat(file) {
-
+	if (!file) {
+		// echo stdin to stdout
+		// TODO: doesn't work...
+		term.input("HI CAT", function (input) {
+			term.print(input)
+		})
+	} else {
+		fileOp(file, (fname, dname, findex) => {
+			let fcontent = document.createElement('div')
+			readLocalFile(file, (content) => {
+				// on success
+				fcontent.innerHtml = content
+				term._output.appendChild(fcontent)
+			}, () => {
+				// on fail
+				term.print("BIG FAIL")
+			})
+		}, (fname, dname, findex) => {
+			term.print("cat: " + fname + ": No such file or directory")
+		})
+	}
 }
 
-function cleanPath(path) {
-	if (![".", "/", "~"].includes(path[0])) path = CWD + "/" + path
-	if (path.endsWith("/")) path = path.substring(0, path.length - 1)
-	path = path.replace("..", CWD.substring(0, CWD.lastIndexOf("/")))
-	path = path.replace(".", CWD)
-	path = path.replace("~", HOME)
-	return path
+const functions = {
+	clear: (argv) => { term.clear() },
+	pwd: (argv) => { term.print(CWD) },
+	echo: (argv) => { 
+		let line = argv.toString()
+		term.print(line.replace(argv[0], "").trim().replace(/\"/g, "")) 
+	},
+	ls: (argv) => { ls(argv[1]) },
+	cd: (argv) => { cd(argv[1]) },
+	cat: (argv) => { cat(argv[1]) }
 }
 
+function processInput(input) {
+	if (input) {
+		argv = input.split(" ")
+		if (Object.keys(functions).includes(argv[0])) {
+			functions[argv[0]](argv)
+		} else {
+			term.print("-bash: " + argv[0] + ": command not	found")
+		}
+	}
+	term.input(ps1(), processInput)
+}
+
+/**
+ * fname: file name to operate on
+ * onFile: callback, called when fname is an available file. passed the following arguments:
+ * 	- fname: name of file
+ * 	- dname: name of directory it exists in (index in dirs)
+ * 	- findex: index in file list of that directory
+ * onNotFile: callback, called when fname is not an available file (could be a dir). passed the following arguments:
+ * 	- fname: name of file
+ * 	- dname: name of directory it exists in (index in dirs)
+ * 	- findex: index in file list of that directory
+ */
 function fileOp(fname, onFile, onNotFile) {
 	fname = cleanPath(fname)
 	for (dname in dirs) {
@@ -141,6 +151,15 @@ function fileOp(fname, onFile, onNotFile) {
 		}
 	}
 	onNotFile(fname, dname, findex)
+}
+
+function cleanPath(path) {
+	if (![".", "/", "~"].includes(path[0])) path = CWD + "/" + path
+	if (path.endsWith("/")) path = path.substring(0, path.length - 1)
+	path = path.replace("..", CWD.substring(0, CWD.lastIndexOf("/")))
+	path = path.replace(".", CWD)
+	path = path.replace("~", HOME)
+	return path
 }
 
 function bashError(func, arg, error) {
@@ -161,6 +180,24 @@ function getSubDirs(workingDir) {
 	})
 	return subDirs
 }
+
+function readLocalFile(fname, onSuccess, onFail) {
+	let PRE = "fs/"
+	let request = new XMLHttpRequest()
+	request.onreadystatechange = function () {
+		if (this.readyState === 4 && (this.status === 200 || this.status === 0)) {
+			onSuccess(this.responseText)
+		} else {
+			onFail()
+		}
+	}
+	request.open("GET", PRE + fname, false)
+	request.send()
+}
+
+// create terminal
+var term = new Terminal()
+document.body.appendChild(term.html)
 
 // show initial prompt
 term.input(ps1(), processInput)
