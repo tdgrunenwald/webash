@@ -76,6 +76,15 @@ var Terminal = (function () {
 		inputField.onkeydown = function (e) {
 			if (e.which === 37 || e.which === 39 || e.which === 38 || e.which === 40 || e.which === 9) {
 				e.preventDefault()
+				if (e.which === 38 && terminalObj.bk_hist.length) {
+					terminalObj.fw_hist.push(inputField.value)
+					inputField.value = terminalObj.bk_hist.pop()
+					terminalObj._inputLine.textContent = inputField.value
+				} else if (e.which === 40 && terminalObj.fw_hist.length) {
+					terminalObj.bk_hist.push(inputField.value)
+					inputField.value = terminalObj.fw_hist.pop()
+					terminalObj._inputLine.textContent = inputField.value
+				}
 			} else if (shouldDisplayInput && e.which !== 13) {
 				setTimeout(function () {
 					terminalObj._inputLine.textContent = inputField.value
@@ -86,7 +95,17 @@ var Terminal = (function () {
 			if (PROMPT_TYPE === PROMPT_CONFIRM || e.which === 13) {
 				terminalObj._input.style.display = 'none'
 				var inputValue = inputField.value
-				if (shouldDisplayInput) terminalObj.print(terminalObj._promptLine.textContent + inputValue)
+				if (shouldDisplayInput) {
+					terminalObj.print(terminalObj._promptLine.textContent + inputValue)
+					if (inputValue !== "") { 
+						terminalObj.bk_hist.push(inputValue) 
+						while (terminalObj.fw_hist.length) {
+							terminalObj.bk_hist.push(terminalObj.fw_hist.pop())
+						}
+						let index = terminalObj.bk_hist.indexOf("")
+						if (index) { terminalObj.bk_hist[index] = inputValue }
+					}
+				}
 				terminalObj.html.removeChild(inputField)
 				if (typeof(callback) === 'function') {
 					if (PROMPT_TYPE === PROMPT_CONFIRM) {
@@ -104,15 +123,9 @@ var Terminal = (function () {
 
 	}
 
-	var terminalBeep
-
 	var TerminalConstructor = function (id) {
-		if (!terminalBeep) {
-			terminalBeep = document.createElement('audio')
-			var source = '<source src="http://www.erikosterberg.com/terminaljs/beep.'
-			terminalBeep.innerHTML = source + 'mp3" type="audio/mpeg">' + source + 'ogg" type="audio/ogg">'
-			terminalBeep.volume = 0.05
-		}
+		this.bk_hist = []
+		this.fw_hist = []
 
 		this.html = document.createElement('div')
 		this.html.className = 'Terminal'
@@ -126,11 +139,6 @@ var Terminal = (function () {
 		this._input = document.createElement('p') //the full element administering the user input, including cursor
 
 		this._shouldBlinkCursor = true
-
-		this.beep = function () {
-			terminalBeep.load()
-			terminalBeep.play()
-		}
 
 		this.print = function (message) {
 			var newLine = document.createElement('div')

@@ -28,11 +28,21 @@ const HOME = "/var/www"
 var CWD = HOME // current working directory
 
 // dirs/links/files are prefixed with an underscore
+// types: 0 = dir, 1 = link, 2 = file
 const _root = {
 	type: 0,
 	content: {
+		_etc: {
+			type: 0,
+			content: {
+				_motd: {
+					type: 2,
+					content: "This is a PLACEHOLDER motd! :)"
+				}
+			}
+		},
 		_var: {
-			type: 0, // 0 = dir, 1 = link, 2 = file
+			type: 0,
 			content: {
 				_www: {
 					type: 0,
@@ -233,6 +243,9 @@ function processInput(input) {
 // create terminal
 var term = new Terminal()
 document.body.appendChild(term.html)
+
+// show motd
+printPre(_root.content._etc.content._motd.content)
 
 // show initial prompt
 term.input(ps1(), processInput)
