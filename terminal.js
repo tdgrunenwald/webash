@@ -40,7 +40,7 @@ var Terminal = (function () {
 	}
 
 	var firstPrompt = true;
-	promptInput = function (terminalObj, message, PROMPT_TYPE, callback) {
+	promptInput = function (terminalObj, message, PROMPT_TYPE) {
 		var shouldDisplayInput = (PROMPT_TYPE === PROMPT_INPUT)
 		var inputField = document.createElement('input')
 
@@ -106,11 +106,7 @@ var Terminal = (function () {
 					}
 				}
 				terminalObj.html.removeChild(inputField)
-				if (typeof(callback) === 'function') {
-					if (PROMPT_TYPE === PROMPT_CONFIRM) {
-						callback(inputValue.toUpperCase()[0] === 'Y' ? true : false)
-					} else callback(inputValue)
-				}
+				terminalObj.prompt(inputValue)
 			}
 		}
 
@@ -162,16 +158,16 @@ var Terminal = (function () {
 			this._output.appendChild(element)
 		}
 
-		this.input = function (message, callback) {
-			promptInput(this, message, PROMPT_INPUT, callback)
+		this.input = function (message) {
+			promptInput(this, message, PROMPT_INPUT)
 		}
 
-		this.password = function (message, callback) {
-			promptInput(this, message, PROMPT_PASSWORD, callback)
+		this.password = function (message) {
+			promptInput(this, message, PROMPT_PASSWORD)
 		}
 
-		this.confirm = function (message, callback) {
-			promptInput(this, message, PROMPT_CONFIRM, callback)
+		this.confirm = function (message) {
+			promptInput(this, message, PROMPT_CONFIRM)
 		}
 
 		this.clear = function () {
@@ -224,13 +220,13 @@ var Terminal = (function () {
 		this.prompt = function (input) {
 			if (input) {
 				argv = input.split(' ')
-				if (Object.keys(functions).includes(argv[0])) {
-					functions[argv[0]](argv)
+				if (Object.keys(this.functions).includes(argv[0])) {
+					this.functions[argv[0]](argv)
 				} else {
-					this.print('-bash: ' + argv[0] + ': command not	found')
+					this.error('-bash: ' + argv[0] + ': command not	found')
 				}
 			}
-			(this.input(this.ps1(), this.prompt)).bind(this)
+			setTimeout(this.input(this.ps1()), 1)
 		}
 
 		this.parsePath = function (path) {

@@ -126,7 +126,7 @@ function error(func, arg, error) {
 
 const functions = {
 	clear: (argv) => { term.clear() },
-	pwd: (argv) => { term.print(CWD) },
+	pwd: (argv) => { term.print(term.cwd) },
 	echo: (argv) => { 
 		let line = argv.join(" ")
 		term.print(line.replace(argv[0], "").trim().replace(/\"/g, "")) 
@@ -154,9 +154,10 @@ const functions = {
 		}
 	},
 	cd: (argv) => {
+		if (!argv[1]) { argv[1] = term.home }
 		let res = term.parsePath(argv[1])
 		if (res[0] && res[0].type === 0) {
-			CWD = res[1]
+			term.setCwd(res[1])
 		} else {
 			bashError("cd", argv[1], "Not a directory")
 		}
