@@ -91,6 +91,7 @@ var Terminal = (function () {
 				}, 1)
 			}
 		}
+
 		inputField.onkeyup = function (e) {
 			if (PROMPT_TYPE === PROMPT_CONFIRM || e.which === 13) {
 				terminalObj._input.style.display = 'none'
@@ -114,13 +115,13 @@ var Terminal = (function () {
 				}
 			}
 		}
+
 		if (firstPrompt) {
 			firstPrompt = false
 			setTimeout(function () { inputField.focus()	}, 50)
 		} else {
 			inputField.focus()
 		}
-
 	}
 
 	var TerminalConstructor = function (id) {
