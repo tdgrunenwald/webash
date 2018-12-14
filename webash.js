@@ -21,18 +21,15 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
-
 */
-const HOME = "/var/www"
-
-var CWD = HOME // current working directory
 
 // dirs/links/files are prefixed with an underscore
-const _root = {
+// types: 0 = dir, 1 = link, 2 = file
+const files = {
 	type: 0,
 	content: {
 		_var: {
-			type: 0, // 0 = dir, 1 = link, 2 = file
+			type: 0, 
 			content: {
 				_www: {
 					type: 0,
@@ -73,7 +70,7 @@ const _root = {
 function printPre(text) {
 	let content = document.createElement('pre')
 	content.textContent = text
-	term._output.appendChild(content)
+	term.output(content)
 }
 
 function printFile(fname) {
@@ -83,7 +80,7 @@ function printFile(fname) {
 	file.className = "file"
 	row.textContent = "-rw-r--r--. tyler www-data "
 	row.appendChild(file)
-	term._output.appendChild(row)
+	term.output(row)
 }
 
 function printLink(lname, url) {
@@ -97,7 +94,7 @@ function printLink(lname, url) {
 	row.textContent = "lrwxrwxrwx. tyler www-data "
 	row.appendChild(link)
 	row.appendChild(target)
-	term._output.appendChild(row)
+	term.output(row)
 }
 
 function printDirectory(dname) {
@@ -107,66 +104,15 @@ function printDirectory(dname) {
 	dir.className = "directory"
 	row.textContent = "drwxr-xr-x. tyler www-data "
 	row.appendChild(dir)
-	term._output.appendChild(row)
-}
-
-function parsePath(path) {
-	if (!path) {
-		path = CWD
-	} else {
-		// don't distinguish - vs _ or upper vs lower case
-		path = path.replace("-", "_").toLowerCase()
-	}
-
-	let parray = path.split("/")
-	if (!parray[parray.length - 1]) parray.pop()
-	if (!parray[0]) {
-		parray.shift()
-	} else {
-		// convert relative paths to absolute
-		let cwd = CWD.split("/")
-		if (!cwd[0]) cwd.shift()
-
-		for (let i in parray) {
-			switch (parray[i]) {
-				case ".":
-					continue
-					break
-				case "..":
-					cwd.pop()
-					break
-				default:
-					cwd.push(parray[i])
-			}
-		}
-		parray = cwd
-		path = "/" + cwd.join("/")
-	}
-
-	try {
-		var dir = _root
-		for (let i in parray) {
-			dir = dir.content["_" + parray[i]]
-		}
-	} catch (e) {
-		term.print(e)
-		dir = null
-		path = CWD
-	}
-	
-	return [dir, path]
+	term.output(row)
 }
 
 function bashError(func, arg, error) {
-	term.print("-bash: " + func + ": " + arg + ": " + error)
+	term.error("-bash: " + func + ": " + arg + ": " + error)
 }
 
 function error(func, arg, error) {
-	term.print(func + ": " + arg + ": " + error)
-}
-
-function ps1() {
-	return "guest@tylergrunenwald.com " + CWD + " $ "
+	term.error(func + ": " + arg + ": " + error)
 }
 
 const functions = {
@@ -177,7 +123,7 @@ const functions = {
 		term.print(line.replace(argv[0], "").trim().replace(/\"/g, "")) 
 	},
 	ls: (argv) => {
-		let res = parsePath(argv[1])
+		let res = term.parsePath(argv[1])
 		if (res[0]) {
 			if (res[0].type === 0) {
 				Object.keys(res[0].content).forEach((key) => {
@@ -199,7 +145,7 @@ const functions = {
 		}
 	},
 	cd: (argv) => {
-		let res = parsePath(argv[1])
+		let res = term.parsePath(argv[1])
 		if (res[0] && res[0].type === 0) {
 			CWD = res[1]
 		} else {
@@ -207,7 +153,7 @@ const functions = {
 		}
 	},
 	cat: (argv) => {
-		let res = parsePath(argv[1])
+		let res = term.parsePath(argv[1])
 		if (res[0] && res[0].type > 0) {
 			printPre(res[0].content)
 		} else if (res[0] && res[0].type === 0) {
@@ -218,22 +164,9 @@ const functions = {
 	}
 }
 
-function processInput(input) {
-	if (input) {
-		argv = input.split(" ")
-		if (Object.keys(functions).includes(argv[0])) {
-			functions[argv[0]](argv)
-		} else {
-			term.print("-bash: " + argv[0] + ": command not	found")
-		}
-	}
-	term.input(ps1(), processInput)
-}
-
 // create terminal
-var term = new Terminal()
+var term = new Terminal("term", functions, files)
 document.body.appendChild(term.html)
 
 // show initial prompt
-term.input(ps1(), processInput)
-
+term.prompt()

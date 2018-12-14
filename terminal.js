@@ -2,7 +2,8 @@
 
 The MIT License (MIT)
 
-Copyright (c) 2014 Erik Österberg
+Original work Copyright (c) 2014 Erik Österberg
+Modifications Copywrite (c) 2018 Tyler Grunenwald
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -21,9 +22,6 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
-
-Modifications Copywrite (c) 2018 Tyler Grunenwald
-
 */
 var Terminal = (function () {
 	// PROMPT_TYPE
@@ -104,15 +102,11 @@ var Terminal = (function () {
 
 	}
 
-	var terminalBeep
-
-	var TerminalConstructor = function (id) {
-		if (!terminalBeep) {
-			terminalBeep = document.createElement('audio')
-			var source = '<source src="http://www.erikosterberg.com/terminaljs/beep.'
-			terminalBeep.innerHTML = source + 'mp3" type="audio/mpeg">' + source + 'ogg" type="audio/ogg">'
-			terminalBeep.volume = 0.05
-		}
+	var TerminalConstructor = function (id, functions, files) {
+		this.functions = functions
+		this.files = files
+		this.cwd = '/'
+		this.home = '/'
 
 		this.html = document.createElement('div')
 		this.html.className = 'Terminal'
@@ -127,15 +121,22 @@ var Terminal = (function () {
 
 		this._shouldBlinkCursor = true
 
-		this.beep = function () {
-			terminalBeep.load()
-			terminalBeep.play()
-		}
-
 		this.print = function (message) {
 			var newLine = document.createElement('div')
 			newLine.textContent = message
+			newLine.className = 'stdout'
 			this._output.appendChild(newLine)
+		}
+
+		this.error = function (message) {
+			var newLine = document.createElement('div')
+			newLine.textContent = message
+			newLine.className = 'stderr'
+			this.output(newLine)
+		}
+
+		this.output = function (element) {
+			this._output.appendChild(element)
 		}
 
 		this.input = function (message, callback) {
@@ -156,6 +157,14 @@ var Terminal = (function () {
 
 		this.sleep = function (milliseconds, callback) {
 			setTimeout(callback, milliseconds)
+		}
+
+		this.setCwd = function (cwd) {
+			this.cwd = cwd
+		}
+
+		this.setHome = function (home) {
+			this.home = home
 		}
 
 		this.setTextSize = function (size) {
@@ -183,6 +192,69 @@ var Terminal = (function () {
 		this.blinkingCursor = function (bool) {
 			bool = bool.toString().toUpperCase()
 			this._shouldBlinkCursor = (bool === 'TRUE' || bool === '1' || bool === 'YES')
+		}
+
+		this.ps1 = function () {
+			return 'user@hostname ' + this.cwd + ' $ '
+		}
+
+		this.prompt = function (input) {
+			if (input) {
+				argv = input.split(' ')
+				if (Object.keys(functions).includes(argv[0])) {
+					functions[argv[0]](argv)
+				} else {
+					this.print('-bash: ' + argv[0] + ': command not	found')
+				}
+			}
+			(this.input(this.ps1(), this.prompt)).bind(this)
+		}
+
+		this.parsePath = function (path) {
+			if (!path) {
+				path = this.cwd
+			} else {
+				// don't distinguish - vs _ or upper vs lower case
+				path = path.replace('-', '_').toLowerCase()
+			}
+
+			let parray = path.split('/')
+			if (!parray[parray.length - 1]) parray.pop()
+			if (!parray[0]) {
+				parray.shift()
+			} else {
+				// convert relative paths to absolute
+				let cwd = this.cwd.split('/')
+				if (!cwd[0]) cwd.shift()
+
+				for (let i in parray) {
+					switch (parray[i]) {
+						case '.':
+							continue
+							break
+						case '..':
+							cwd.pop()
+							break
+						default:
+							cwd.push(parray[i])
+					}
+				}
+				parray = cwd
+				path = '/' + cwd.join('/')
+			}
+
+			try {
+				var dir = this.files
+				for (let i in parray) {
+					dir = dir.content['_' + parray[i]]
+				}
+			} catch (e) {
+				this.print(e)
+				dir = null
+				path = this.cwd
+			}
+	
+			return [dir, path]
 		}
 
 		this._input.appendChild(this._promptLine)
