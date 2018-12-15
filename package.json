@@ -1,6 +1,6 @@
 {
 	"name": "webash",
-	"version": "0.1.0",
+	"version": "0.1.1",
 	"scripts": {
 		"build": "babel *.js --out-dir prod --presets minify && cp *.html *.css files.json prod/"
 	},

@@ -1,4 +1,4 @@
-/* webash 0.0.0 | Copywrite (c) 2018 Tyler Grunenwald | https://github.com/tdgrunenwald/webash 
+/* webash 0.1.1 | Copywrite (c) 2018 Tyler Grunenwald | https://github.com/tdgrunenwald/webash 
 
 The MIT License (MIT)
 
