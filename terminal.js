@@ -72,7 +72,8 @@ var Terminal = (function () {
 		}
 
 		inputField.onkeydown = function (e) {
-			if (e.which === 37 || e.which === 39 || e.which === 38 || e.which === 40 || e.which === 9) {
+			if (e.which === 37 || e.which === 39 || e.which === 38 || e.which === 40 || e.which === 9
+				|| (e.ctrlKey && e.which === 76)) {
 				e.preventDefault()
 				if (e.which === 38 && terminalObj.bk_hist.length) {
 					terminalObj.fw_hist.push(inputField.value)
@@ -82,6 +83,8 @@ var Terminal = (function () {
 					terminalObj.bk_hist.push(inputField.value)
 					inputField.value = terminalObj.fw_hist.pop()
 					terminalObj._inputLine.textContent = inputField.value
+				} else if (e.ctrlKey && e.which === 76) {
+					terminalObj.clear()
 				}
 			} else if (shouldDisplayInput && e.which !== 13) {
 				setTimeout(function () {
@@ -268,7 +271,6 @@ var Terminal = (function () {
 					dir = dir.content['_' + parray[i]]
 				}
 			} catch (e) {
-				this.print(e)
 				dir = null
 				path = this.cwd
 			}
