@@ -6,7 +6,7 @@
 			"content": {
 				"motd": {
 					"type": 2,
-					"content": " ____  _  _  __    ____  ____   ___  ____  _  _  __ _  ____  __ _  _  _   __   __    ____     ___  __   _  _ \n(_  _)( \\/ )(  )  (  __)(  _ \\ / __)(  _ \\/ )( \\(  ( \\(  __)(  ( \\/ )( \\ / _\\ (  )  (    \\   / __)/  \\ ( \\/ )\n  )(   )  / / (_/\\ ) _)  )   /( (_ \\ )   /) \\/ (/    / ) _) /    /\\ /\\ //    \\/ (_/\\ ) D ( _( (__(  O )/ \\/ \\\n (__) (__/  \\____/(____)(__\\_) \\___/(__\\_)\\____/\\_)__)(____)\\_)__)(_/\\_)\\_/\\_/\\____/(____/(_)\\___)\\__/ \\_)(_/\n  Powered by webash 0.0.0 => https://github.com/tdgrunenwald/webash"
+					"content": " ____  _  _  __    ____  ____   ___  ____  _  _  __ _  ____  __ _  _  _   __   __    ____     ___  __   _  _ \n(_  _)( \\/ )(  )  (  __)(  _ \\ / __)(  _ \\/ )( \\(  ( \\(  __)(  ( \\/ )( \\ / _\\ (  )  (    \\   / __)/  \\ ( \\/ )\n  )(   )  / / (_/\\ ) _)  )   /( (_ \\ )   /) \\/ (/    / ) _) /    /\\ /\\ //    \\/ (_/\\ ) D ( _( (__(  O )/ \\/ \\\n (__) (__/  \\____/(____)(__\\_) \\___/(__\\_)\\____/\\_)__)(____)\\_)__)(_/\\_)\\_/\\_/\\____/(____/(_)\\___)\\__/ \\_)(_/\n  Powered by webash 0.1.0 => https://github.com/tdgrunenwald/webash"
 				}
 			}
 		},
@@ -18,13 +18,21 @@
 					"content": {
 						"about": {
 							"type": 2,
-							"content": "This is the about page"
+							"content": "Hello,\nI'm Tyler Grunenwald. Welcome to my awesome website. I'm a computer science\nundergrad and a religious user of the GNU/Linux operating system.\nThings I'm interested in include:\n - C programming\n - Computer Security\n - Configuring Linux Systems\n - Yacht Racing\n\nPlease have a look around, and let me know if you find any bugs.\n\nCheers,\nTyler"
 						},
 						"github": {
 							"type": 1,
 							"content": "https://github.com/tdgrunenwald"
 						},
-						"blog": {
+						"linkedin": {
+							"type": 1,
+							"content": "https://www.linkedin.com/in/tylergrunenwald"
+						},
+						"email": {
+							"type": 1,
+							"content": "mailto:grune033@d.umn.edu"
+						},
+						"docs": {
 							"type": 0,
 							"content": {
 								"hello_world": {
@@ -34,7 +42,7 @@
 								"archived": {
 									"type": 0,
 									"content": {
-										"old_crap": {
+										"old_thing": {
 											"type": 2,
 											"content": "This is an old dusty file"
 										}
