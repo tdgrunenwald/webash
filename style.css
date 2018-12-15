@@ -23,9 +23,13 @@ pre {
 }
 
 .stdout {
-
+	color: white;
 }
 
 .stderr {
 	color: red;
+}
+
+.prompt {
+	color: white;
 }

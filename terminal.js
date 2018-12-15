@@ -85,6 +85,9 @@ var Terminal = (function () {
 					terminalObj._inputLine.textContent = inputField.value
 				} else if (e.ctrlKey && e.which === 76) {
 					terminalObj.clear()
+				} else if (e.which === 9) {
+					inputField.value = tabComplete(terminalObj, inputField.value)
+					terminalObj._inputLine.textContent = inputField.value
 				}
 			} else if (shouldDisplayInput && e.which !== 13) {
 				setTimeout(function () {
@@ -121,11 +124,26 @@ var Terminal = (function () {
 		}
 	}
 
+	tabComplete = function (terminalObj, inputValue) {
+		let inputv = inputValue.split(' ')
+		let dir = terminalObj.parsePath(terminalObj.cwd)[0]
+		let contents = Object.keys(dir.content)
+		let completion = inputv.pop()
+		for (i in contents) {
+			contents[i] = contents[i].substring(1, contents[i].length) // remove leading underscore
+			if (contents[i].startsWith(completion)) { completion = contents[i]; break }
+		}
+		inputv.push(completion)
+		return inputv.join(' ')
+	}
+
 	var TerminalConstructor = function (id, functions, files) {
 		this.functions = functions
 		this.files = files
 		this.cwd = '/'
 		this.home = '/'
+		this.user = 'user'
+		this.hostname = 'localhost'
 
 		this.bk_hist = []
 		this.fw_hist = []
@@ -189,6 +207,22 @@ var Terminal = (function () {
 			this.home = home
 		}
 
+		this.setUser = function (user) {
+			this.user = user
+		}
+
+		this.setHostname = function (hostname) {
+			this.hostname = hostname
+		}
+
+		this.setFiles = function (files) {
+			this.files = files
+		}
+		
+		this.setFunctions = function (functions) {
+			this.functions = functions
+		}
+
 		this.setTextSize = function (size) {
 			this._output.style.fontSize = size
 			this._input.style.fontSize = size
@@ -217,7 +251,7 @@ var Terminal = (function () {
 		}
 
 		this.ps1 = function () {
-			return 'user@hostname ' + this.cwd + ' $ '
+			return this.user + '@' + this.hostname + ' ' + this.cwd + ' $ '
 		}
 
 		this.prompt = function (input) {
@@ -300,6 +334,7 @@ var Terminal = (function () {
 		this._cursor.innerHTML = 'C' //put something in the cursor..
 		this._cursor.style.display = 'none' //then hide it
 		this._input.style.display = 'none'
+		this._promptLine.className = 'prompt'
 	}
 
 	return TerminalConstructor

@@ -176,6 +176,8 @@ const functions = {
 
 // create terminal
 var term = new Terminal("term", functions, _root)
+term.setCwd('/var/www')
+term.setHome('/var/www')
 document.body.appendChild(term.html)
 
 // show motd
