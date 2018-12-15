@@ -126,7 +126,7 @@ term.setCwd('/var/www')
 term.setHome('/var/www')
 document.body.appendChild(term.html)
 
-fetch('/files.json').then((response) => {
+fetch('files.json').then((response) => {
 	response.json().then((data) => {
 		term.setFiles(data)
 		printPre(term.files.content.etc.content.motd.content) // show motd
