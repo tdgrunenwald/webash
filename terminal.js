@@ -130,7 +130,6 @@ var Terminal = (function () {
 		let contents = Object.keys(dir.content)
 		let completion = inputv.pop()
 		for (i in contents) {
-			contents[i] = contents[i].substring(1, contents[i].length) // remove leading underscore
 			if (contents[i].startsWith(completion)) { completion = contents[i]; break }
 		}
 		inputv.push(completion)
@@ -302,7 +301,7 @@ var Terminal = (function () {
 			try {
 				var dir = this.files
 				for (let i in parray) {
-					dir = dir.content['_' + parray[i]]
+					dir = dir.content[parray[i]]
 				}
 			} catch (e) {
 				dir = null

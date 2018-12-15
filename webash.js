@@ -83,11 +83,10 @@ const functions = {
 		if (res[0]) {
 			if (res[0].type === 0) {
 				Object.keys(res[0].content).forEach((key) => {
-					let name = key.substring(1, key.length)
 					switch (res[0].content[key].type) {
-						case 0: printDirectory(name); break;
-						case 1: printLink(name, res[0].content[key].content); break;
-						case 2: printFile(name); break;
+						case 0: printDirectory(key); break;
+						case 1: printLink(key, res[0].content[key].content); break;
+						case 2: printFile(key); break;
 						default: console.log("unknown file type: " + res[0].content[key].type)
 					}
 				})
@@ -130,7 +129,7 @@ document.body.appendChild(term.html)
 fetch('/files.json').then((response) => {
 	response.json().then((data) => {
 		term.setFiles(data)
-		printPre(term.files.content._etc.content._motd.content) // show motd
+		printPre(term.files.content.etc.content.motd.content) // show motd
 		term.prompt() // show initial prompt
 	})
 })

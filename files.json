@@ -1,40 +1,40 @@
 {
 	"type": 0,
 	"content": {
-		"_etc": {
+		"etc": {
 			"type": 0,
 			"content": {
-				"_motd": {
+				"motd": {
 					"type": 2,
 					"content": " ____  _  _  __    ____  ____   ___  ____  _  _  __ _  ____  __ _  _  _   __   __    ____     ___  __   _  _ \n(_  _)( \\/ )(  )  (  __)(  _ \\ / __)(  _ \\/ )( \\(  ( \\(  __)(  ( \\/ )( \\ / _\\ (  )  (    \\   / __)/  \\ ( \\/ )\n  )(   )  / / (_/\\ ) _)  )   /( (_ \\ )   /) \\/ (/    / ) _) /    /\\ /\\ //    \\/ (_/\\ ) D ( _( (__(  O )/ \\/ \\\n (__) (__/  \\____/(____)(__\\_) \\___/(__\\_)\\____/\\_)__)(____)\\_)__)(_/\\_)\\_/\\_/\\____/(____/(_)\\___)\\__/ \\_)(_/\n  Powered by webash 0.0.0 => https://github.com/tdgrunenwald/webash"
 				}
 			}
 		},
-		"_var": {
+		"var": {
 			"type": 0, 
 			"content": {
-				"_www": {
+				"www": {
 					"type": 0,
 					"content": {
-						"_about": {
+						"about": {
 							"type": 2,
 							"content": "This is the about page"
 						},
-						"_github": {
+						"github": {
 							"type": 1,
 							"content": "https://github.com/tdgrunenwald"
 						},
-						"_blog": {
+						"blog": {
 							"type": 0,
 							"content": {
-								"_hello_world": {
+								"hello_world": {
 									"type": 2,
 									"content": "Hello, World!"
 								},
-								"_archived": {
+								"archived": {
 									"type": 0,
 									"content": {
-										"_old_crap": {
+										"old_crap": {
 											"type": 2,
 											"content": "This is an old dusty file"
 										}
