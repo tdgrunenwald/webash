@@ -23,59 +23,6 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-// dirs/links/files are prefixed with an underscore
-// types: 0 = dir, 1 = link, 2 = file
-const _root = {
-	type: 0,
-	content: {
-		_etc: {
-			type: 0,
-			content: {
-				_motd: {
-					type: 2,
-					content: " ____  _  _  __    ____  ____   ___  ____  _  _  __ _  ____  __ _  _  _   __   __    ____     ___  __   _  _ \n(_  _)( \\/ )(  )  (  __)(  _ \\ / __)(  _ \\/ )( \\(  ( \\(  __)(  ( \\/ )( \\ / _\\ (  )  (    \\   / __)/  \\ ( \\/ )\n  )(   )  / / (_/\\ ) _)  )   /( (_ \\ )   /) \\/ (/    / ) _) /    /\\ /\\ //    \\/ (_/\\ ) D ( _( (__(  O )/ \\/ \\\n (__) (__/  \\____/(____)(__\\_) \\___/(__\\_)\\____/\\_)__)(____)\\_)__)(_/\\_)\\_/\\_/\\____/(____/(_)\\___)\\__/ \\_)(_/\n  Powered by webash 0.0.0 => https://github.com/tdgrunenwald/webash"
-				}
-			}
-		},
-		_var: {
-			type: 0, 
-			content: {
-				_www: {
-					type: 0,
-					content: {
-						_about: {
-							type: 2,
-							content: "This is the about page"
-						},
-						_github: {
-							type: 1,
-							content: "https://github.com/tdgrunenwald"
-						},
-						_blog: {
-							type: 0,
-							content: {
-								_hello_world: {
-									type: 2,
-									content: "Hello, World!"
-								},
-								_archived: {
-									type: 0,
-									content: {
-										_old_crap: {
-											type: 2,
-											content: "This is an old dusty file"
-										}
-									}
-								}
-							}
-						}
-					}
-				}
-			}
-		}
-	}
-}
-
 function printPre(text) {
 	let content = document.createElement('pre')
 	content.textContent = text
@@ -175,13 +122,16 @@ const functions = {
 }
 
 // create terminal
-var term = new Terminal("term", functions, _root)
+var term = new Terminal("term", functions)
 term.setCwd('/var/www')
 term.setHome('/var/www')
 document.body.appendChild(term.html)
 
-// show motd
-printPre(_root.content._etc.content._motd.content)
+fetch('/files.json').then((response) => {
+	response.json().then((data) => {
+		term.setFiles(data)
+		printPre(term.files.content._etc.content._motd.content) // show motd
+		term.prompt() // show initial prompt
+	})
+})
 
-// show initial prompt
-term.prompt()
