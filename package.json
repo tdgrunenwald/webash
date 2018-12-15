@@ -1,0 +1,11 @@
+{
+	"name": "webash",
+	"version": "0.1.0",
+	"scripts": {
+		"build": "babel *.js --out-dir prod --presets minify && cp *.html *.css files.json prod/"
+	},
+	"devDependencies": {
+		"babel-cli": "^6.26.0",
+		"babel-preset-minify": "^0.5.0"
+	}
+}
